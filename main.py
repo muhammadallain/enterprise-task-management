@@ -27,11 +27,10 @@ def retrieveUserInfo(claims):
     entity = datastore_client.get(entity_key)
     return entity
 
-####################### Create and Retrieve Vehicles ###########################
-#Create Vehicle Objects
+####################### Create and Retrieve Boards ###########################
+#Create Board Objects
 def createBoard(claims, name):
-    # 63 bit random number that will serve as the key for this address object. not sure
-    # why the data store doesn't like 64 bit numbers
+    # 63 bit random number that will serve as the key for this board object.
     id = random.getrandbits(63)
     entity_key = datastore_client.key('Board', id)
     entity = datastore.Entity(key = entity_key)
@@ -43,7 +42,7 @@ def createBoard(claims, name):
     datastore_client.put(entity)
     return id
 
-#Retrieve Vehicle Objects
+#Retrieve Board Objects
 def retrieveBoards(user_info):
     #make key objects out of all the keys and retrieve them
     board_id = user_info['created_boards']
@@ -53,13 +52,13 @@ def retrieveBoards(user_info):
     board_list = datastore_client.get_multi(board_keys)
     return board_list
 
-# Get vehicle info
-def retrieveBoardInfo(id):
+# Get a board by key
+def getBoardByKey(id):
     entity_key = datastore_client.key('Board', id)
     entity = datastore_client.get(entity_key)
     return entity
 
-######################### Bind Vehicles to UserInfo ############################
+######################### Bind Boards to UserInfo ############################
 def addBoardToUser(user_info, id):
     board_keys = user_info['created_boards']
     board_keys.append(id)
@@ -68,43 +67,55 @@ def addBoardToUser(user_info, id):
     })
     datastore_client.put(user_info)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-####################### Create and Retrieve Reviews ###########################
-# Create vehicle reviews
-def createReview(claims, rating, review, dt):
+####################### Create and Retrieve Tasks ###########################
+# Create tasks
+def createTask(claims, title, due_date, status, assigned_to):
     id = random.getrandbits(63)
-    entity_key = datastore_client.key('Review', id)
+    entity_key = datastore_client.key('Task', id)
     entity = datastore.Entity(key = entity_key)
     entity.update({
-        'rating' : rating,
-        'review' : review,
-        'timestamp': dt
+        'title' : title,
+        'due_date' : due_date,
+        'status': status,
+        'assigned_to': assigned_to,
+        'completed_at': None
     })
     datastore_client.put(entity)
     return id
 
-#Retrieve Vehicle Objects
-def retrieveReviews(vehicle_info):
+#Retrieve Task Objects
+def retrieveTasks(board):
     #make key objects out of all the keys and retrieve them
-    review_id = vehicle_info['review_list']
-    review_keys = []
-    for i in range(len(review_id)):
-        review_keys.append(datastore_client.key('Review', review_id[i]))
-    review_list = datastore_client.get_multi(review_keys)
-    return review_list
+    task_id = board['task_list']
+    task_keys = []
+    for i in range(len(task_id)):
+        task_keys.append(datastore_client.key('Task', task_id[i]))
+    task_list = datastore_client.get_multi(task_keys)
+    return task_list
+
+def addTaskToBoard(board, id):
+    task_keys = board['task_list']
+    task_keys.append(id)
+    board.update({
+        'task_list': task_keys
+    })
+    datastore_client.put(board)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Calculate average ratings
 def update_average_rating(vehicle_info):
@@ -156,6 +167,47 @@ def deleteVehicle(claims, id):
 ################################################################################
 ################################## App Routes ##################################
 ################################################################################
+@app.route('/board/<int:id>', methods=['GET','POST'])
+def open_board(id):
+    id_token = request.cookies.get("token")
+    error_message = None
+    claims = None
+    user_info = None
+    board = None
+    current_id = id
+    if request.method == 'GET':
+        if id_token:
+            try:
+                claims = google.oauth2.id_token.verify_firebase_token(
+                    id_token, firebase_request_adapter)
+                user_info = retrieveUserInfo(claims)
+                board = getBoardByKey(id)
+                tasks = retrieveTasks(board)
+            except ValueError as exc:
+                error_message = str(exc)
+        return render_template('board.html', user_data=claims, error_message=error_message, user_info=user_info, 
+                               board=board, current_id=current_id, tasks=tasks)
+
+@app.route('/create_task', methods=['POST'])
+def create_task():
+    id_token = request.cookies.get("token")
+    error_message = None
+    claims = None
+    user_info = None
+    current_id = int(request.form['board_id'])
+    if id_token:
+        try:
+            claims = google.oauth2.id_token.verify_firebase_token(
+                id_token, firebase_request_adapter)
+            user_info = retrieveUserInfo(claims)
+            board = getBoardByKey(current_id)
+            print(board)
+            id = createTask(claims, request.form['title'], request.form['due_date'], request.form['status'], request.form['assigned_to'])
+            addTaskToBoard(board, id)
+        except ValueError as exc:
+            error_message = str(exc)
+    return redirect(url_for("open_board", id=current_id))
+
 @app.route('/create_board', methods=['POST'])
 def create_board():
     id_token = request.cookies.get("token")

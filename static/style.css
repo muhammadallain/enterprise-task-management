@@ -20,14 +20,6 @@ dd{
     display: inline;
     text-align: left;
 }
-h2{
-    text-align: center;
-    text-transform: uppercase;
-    padding: 1em;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 1.8em;
-    color: crimson;
-}
 h3{
     text-align: center;
     padding: 1em;
@@ -101,6 +93,15 @@ header nav ul ul{
 }
 
 /* For home page banner */
+.class-area{
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    padding: 2em;
+}
 .banner-area{
     display: flex;
     flex-direction: column;
@@ -118,34 +119,6 @@ header nav ul ul{
     text-transform: capitalize;
 }
 
-.banner-area, .banner-img, .info-area{
-    background-image: url(../images/peakpx.jpg);
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-}
-.class-area, .class-img{
-    background-image: url(../images/pilates2.JPG);
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-}
-.testimonial-area{
-    position: relative;
-    justify-content: center;
-    color: white;
-    text-align: center;
-}
-.testimonial-area h2{
-    margin-bottom: 15px;
-    font-size: 65px;
-    color: black;
-}
-.testimonial-area h3{
-    margin-bottom: 40px;
-    font-size: 25px;
-    color: black;
-}
 .banner-area, .banner-img:after, .class-area, .class-img::after, .info-area{
     content: '';
     width: 100%;
@@ -155,7 +128,6 @@ header nav ul ul{
 }
 .banner-area h2, .class-area h2{
     margin-bottom: 15px;
-    font-size: 65px;
     background: rgba(0, 0, 0, 0.253);
 }
 .banner-area h3, .class-area h3{
@@ -169,18 +141,18 @@ a.banner-btn, .about-btn{
     text-transform: uppercase;
     color: white;
 }
-
-.section-title{
-    text-transform: uppercase;
-    font-size: 50px;
-    margin-bottom: 5%;
+.add-task{
+    float: right;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.80);
+    color: white;
+    margin: 0em 3em;
+    padding: 1em;
 }
-.wrapper1{
-    padding: 2em;
-    display: flex;
-    flex-flow: column wrap;
-    justify-content: center;
-    align-items: center;
+.task-table{
+    text-align: center;
+    padding: 1em;
+    margin: 1em 2em;
 }
 .box-area, .wrapper{
     padding: 2em;
@@ -192,18 +164,6 @@ a.banner-btn, .about-btn{
     max-width: fit-content;
 }
 
-.vehicle-box{
-    position: relative;
-    display: flex;
-    flex-flow: row;
-    height: auto;
-    border-radius: 4px;
-    background-color: rgba(0, 0, 0, 0.637);
-    color: white;
-    margin: 20px;
-    padding: 20px;
-    transition: .3s;
-}
 .single-box, .box{
     position: relative;
     display: flex;
@@ -225,51 +185,6 @@ a.banner-btn, .about-btn{
     color: white;
     transition: 0.3s ease-out;
 }
-.heading{
-    text-align: center;
-    padding: 2em;
-    margin-top: 2em;
-}
-.main{
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: center;
-    margin-top: 1em;
-    margin-bottom: 2em;
-}
-.add-vehicle-form{
-    background-color: black;
-    padding: 1em;
-    align-items: center;
-    justify-content: center;
-    height: auto;
-    border-radius: 4px;
-    color: white;
-    text-align: center;
-    max-width: fit-content;
-    float: right;
-    margin: 20px;
-    margin-top: 3em;
-    margin-right: 9em;
-    padding: 20px;
-    transition: .3s;
-}
-.review-form{
-    float: left;
-    background-color: black;
-    padding: 1em;
-    border-radius: 4px;
-    color: white;
-    text-align: left;
-    width: 64%;
-    margin: 20px;
-    margin-left: 3em;
-    padding: 3em;
-}
-.review-form h3{
-    color: crimson;
-}
-
 .form{
     background-color: black;
     padding: 1em;
@@ -286,30 +201,6 @@ a.banner-btn, .about-btn{
     transition: .3s;
     float: left;
 }
-.info-buttons{
-    display: flex;
-    align-self: center;
-    margin: 1em;
-}
-.info{
-    display: flex;
-    align-self: center;
-    margin: 1em;
-}
-.edit-vehicle-form{
-    background-color: black;
-    padding: 1em;
-    height: auto;
-    border-radius: 4px;
-    color: white;
-    text-align: center;
-    max-width: fit-content;
-    float: right;
-    margin: 20px;
-    margin-top: 3em;
-    margin-right: 5em;
-    padding: 20px;
-}
 table{
     text-align: center;
 }
@@ -325,24 +216,6 @@ th, td, tr{
     justify-content: center;
     min-height: 35vh;
 }
-.vehicle-info{
-    float: left;
-    display: flex;
-    flex-direction: column;
-    background-color: black;
-    padding: 1em;
-    border-radius: 4px;
-    color: white;
-    text-align: left;
-    width: 64%;
-    margin: 20px;
-    margin-top: 3em;
-    margin-left: 3em;
-    padding: 3em;
-}
-.vehicle-info h3{
-    color: crimson;
-}
 .form h2, .add-vehicle-form h2, .edit-vehicle-form h3{
     font-family: Arial, Helvetica, sans-serif;
     font-size: 1.5em;
@@ -352,26 +225,11 @@ th, td, tr{
     background-color: black;
     color: crimson;
 }
-.form label, .add-vehicle-form label, .edit-vehicle-form label, .vehicle-info label{
+.form label, label{
     display: inline-block;
     min-width: 135px;
     vertical-align: center;
     color: white;
-}
-
-.button{
-    padding: 0.5em;
-    margin-bottom: 1em;
-    margin-top: 1em;
-    border-radius: 0.5em;
-    background-color: #000;
-    border-style: none;
-    font-size: 1em;
-}
-.button:hover, td a:hover{
-    background-color: crimson;
-    color: #fff;
-    transition: 0.2s ease-out;
 }
 .formbutton{
     padding: 0.5em;
@@ -389,14 +247,9 @@ th, td, tr{
     color: #fff;
     transition: 0.2s ease-out;
 }
-.form select, input, input[type=number]{
+.form select, input, input[type=number], select{
     padding: 0.5em;
     margin: 0.5em;
-}
-input[type=radio] {
-    border: 0px;
-    width: 100%;
-    height: 2em;
 }
 
 @media(max-width: 1000px){

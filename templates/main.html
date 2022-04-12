@@ -32,7 +32,7 @@
                     My Boards
                 </legend>
                 {% for board in boards %}
-                <p style="line-height: 30px;"><a href="#">{{ board.name }}</a></p>
+                <p style="line-height: 30px;"><a href="/board/{{ board.id }}">{{ board.name }}</a></p>
                 {% endfor %}
             </fieldset>
             {% elif error_message %}

@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block main %}
+<main>
+    <section class="class-area">
+        <h3>Welcome to Task Manager v1.0</h3>
+        <div>
+            <!--h2>Login Info</h2-->
+            {% if user_data %}
+                <p>{{ user_data['name'] }}</p>
+                <h3>Task Board: {{ board.name }}</h3>
+            {% elif error_message %}
+                <p>Error Message: {{ error_message }}</p>
+            {% endif %}
+        </div>
+    </section>
+    <section class="add-task">
+        <form action="/create_task" method="POST" style="margin-top: 1em;">
+            <fieldset style="display: inline;">
+
+                <legend style="padding: 1em; text-transform: uppercase; font-weight: 600;">
+                    Add a new Task
+                </legend>
+
+                <input type="number" name="board_id" value="{{ current_id }}" hidden>
+
+                <label for="title">Task Title</label>
+                <input type="text" name="title" placeholder="Enter task title" required 
+                style="margin-right: 1em; min-width: 180px;"><br>
+
+                <label for="due_date">Due Date</label>
+                <input type="date" name="due_date" required style="margin-right: 1em; min-width: 180px;"><br>
+
+                <label for="status">Status</label>
+                <select name="status" id="status" style="margin-right: 1em; min-width: 180px;">
+                    <option value="not_complete" selected="selected">Not Complete</option>
+                    <option value="complete">Complete</option>
+                </select><br>
+
+                <label for="assigned_to">Assign Task</label>
+                <select name="assigned_to" id="assigned_to"
+                style="margin-right: 1em; min-width: 180px;">
+                <!---------------------------------------------------------------------------------->    
+                <!---------------------------------------------------------------------------------->    
+                <!---------------------------------------------------------------------------------->    
+                    <option value="">Users</option>
+                <!---------------------------------------------------------------------------------->
+                <!---------------------------------------------------------------------------------->
+                <!---------------------------------------------------------------------------------->
+                </select><br>
+
+                <div style="display: flex; justify-content: right;">
+                    <input type="submit" name="submit" value="Add Task" class="formbutton"
+                    style="margin-right: 1em;">
+                </div>
+                
+            </fieldset>
+        </form>
+
+        <form action="/add_user" method="POST" style="margin-top: 1em;">
+            <fieldset style="display: inline;">
+                <legend style="padding: 1em; text-transform: uppercase; font-weight: 600;">
+                    Add users to board
+                </legend>
+                <input type="number" name="board_id" value="{{ current_id }}" hidden>
+
+                <label for="email">User Email</label>
+                <input type="email" name="email" placeholder="Enter email of user" required 
+                style="margin-right: 1em; min-width: 180px;"><br>
+
+                <div style="display: flex; justify-content: right;">
+                    <input type="submit" name="submit" value="Add User" class="formbutton"
+                    style="margin-right: 1em;">
+                </div>
+            </fieldset>
+        </form>
+    </section>
+
+    <section class="task-table">
+        <div>
+            {% if user_data %}
+            <fieldset style="display: inline; min-width: 447px; padding-bottom: 1em;">
+                <legend style="padding: 1em; text-transform: uppercase; font-weight: 600;">
+                    Tasks
+                </legend>
+                <table>
+                    <tr>
+                        <th>Task Title</th>
+                        <th>Due Date</th>
+                        <th>Assigned To</th>
+                        <th>Status</th>
+                        <th>Completion Date/Time</th>
+                    </tr>
+                    {% for task in tasks %}
+                        <tr>
+                            <td>{{ task.title }}</td>
+                            <td>{{task.due_date}}</td>
+                            <td>{{task.assigned_to}}</td>
+                            <td>{{task.status}}</td>
+                            <td>{{task.completed_at}}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </fieldset>
+            {% elif error_message %}
+                <p>Error Message: {{ error_message }}</p>
+            {% endif %}
+        </div>
+    </section>
+</main>
+{% endblock %}
