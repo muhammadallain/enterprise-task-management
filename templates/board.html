@@ -2,12 +2,12 @@
 {% block main %}
 <main>
     <section class="class-area">
-        <h3>Welcome to Task Manager v1.0</h3>
         <div>
             <!--h2>Login Info</h2-->
             {% if user_data %}
-                <p>{{ user_data['name'] }}</p>
                 <h3>Task Board: {{ board.name }}</h3>
+                <p>Created By: {{ board.creator }}</p>
+                <p>Current User: {{ user_data['name'] }}</p>
             {% elif error_message %}
                 <p>Error Message: {{ error_message }}</p>
             {% endif %}
@@ -41,8 +41,10 @@
                 style="margin-right: 1em; min-width: 180px;">
                 <!---------------------------------------------------------------------------------->    
                 <!---------------------------------------------------------------------------------->    
-                <!---------------------------------------------------------------------------------->    
-                    <option value="">Users</option>
+                <!---------------------------------------------------------------------------------->
+                {% for user in board['user_list'] %}   
+                    <option value="{{ user }}"> {{ user }}</option>
+                {% endfor %}
                 <!---------------------------------------------------------------------------------->
                 <!---------------------------------------------------------------------------------->
                 <!---------------------------------------------------------------------------------->
@@ -56,6 +58,7 @@
             </fieldset>
         </form>
 
+        {% if user_data['email'] == board.creator %}
         <form action="/add_user" method="POST" style="margin-top: 1em;">
             <fieldset style="display: inline;">
                 <legend style="padding: 1em; text-transform: uppercase; font-weight: 600;">
@@ -73,6 +76,7 @@
                 </div>
             </fieldset>
         </form>
+        {% endif %}
     </section>
 
     <section class="task-table">
@@ -93,10 +97,10 @@
                     {% for task in tasks %}
                         <tr>
                             <td>{{ task.title }}</td>
-                            <td>{{task.due_date}}</td>
-                            <td>{{task.assigned_to}}</td>
-                            <td>{{task.status}}</td>
-                            <td>{{task.completed_at}}</td>
+                            <td>{{ task.due_date }}</td>
+                            <td>{{ task.assigned_to }}</td>
+                            <td>{{ task.status }}</td>
+                            <td>{{ task.completed_at }}</td>
                         </tr>
                     {% endfor %}
                 </table>

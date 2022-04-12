@@ -18,7 +18,7 @@ def createUserInfo(claims):
     entity.update({
         'email': claims['email'],
         'name': claims['name'],
-        'created_boards': []
+        'board_list': []
     })
     datastore_client.put(entity)
 
@@ -37,15 +37,17 @@ def createBoard(claims, name):
     entity.update({
         'name': name,
         'task_list': [],
-        'user_list': []
+        'user_list': [],
+        'creator': claims['email']
     })
     datastore_client.put(entity)
+    addUserToBoard(entity, claims['email'])
     return id
 
 #Retrieve Board Objects
 def retrieveBoards(user_info):
     #make key objects out of all the keys and retrieve them
-    board_id = user_info['created_boards']
+    board_id = user_info['board_list']
     board_keys = []
     for i in range(len(board_id)):
         board_keys.append(datastore_client.key('Board', board_id[i]))
@@ -60,10 +62,10 @@ def getBoardByKey(id):
 
 ######################### Bind Boards to UserInfo ############################
 def addBoardToUser(user_info, id):
-    board_keys = user_info['created_boards']
+    board_keys = user_info['board_list']
     board_keys.append(id)
     user_info.update({
-        'created_boards': board_keys
+        'board_list': board_keys
     })
     datastore_client.put(user_info)
 
@@ -98,6 +100,13 @@ def addTaskToBoard(board, id):
     task_keys.append(id)
     board.update({
         'task_list': task_keys
+    })
+    datastore_client.put(board)
+def addUserToBoard(board, email):
+    user_keys = board['user_list']
+    user_keys.append(email)
+    board.update({
+        'user_list': user_keys
     })
     datastore_client.put(board)
 
@@ -164,6 +173,24 @@ def deleteVehicle(claims, id):
     })
     datastore_client.put(user_info)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ################################################################################
 ################################## App Routes ##################################
 ################################################################################
@@ -188,6 +215,31 @@ def open_board(id):
         return render_template('board.html', user_data=claims, error_message=error_message, user_info=user_info, 
                                board=board, current_id=current_id, tasks=tasks)
 
+@app.route('/add_user', methods=['POST'])
+def add_user():
+    id_token = request.cookies.get("token")
+    error_message = None
+    claims = None
+    user_info = None
+    current_id = int(request.form['board_id'])
+    if id_token:
+        try:
+            claims = google.oauth2.id_token.verify_firebase_token(
+                id_token, firebase_request_adapter)
+            user_info = retrieveUserInfo(claims)
+            board = getBoardByKey(current_id)
+            
+            entity_key = datastore_client.key('UserInfo', request.form['email'])
+            entity = datastore_client.get(entity_key)
+            if entity:
+                addUserToBoard(board, request.form['email'])
+                addBoardToUser(entity, current_id)
+            
+            
+        except ValueError as exc:
+            error_message = str(exc)
+    return redirect(url_for("open_board", id=current_id))
+
 @app.route('/create_task', methods=['POST'])
 def create_task():
     id_token = request.cookies.get("token")
@@ -201,7 +253,6 @@ def create_task():
                 id_token, firebase_request_adapter)
             user_info = retrieveUserInfo(claims)
             board = getBoardByKey(current_id)
-            print(board)
             id = createTask(claims, request.form['title'], request.form['due_date'], request.form['status'], request.form['assigned_to'])
             addTaskToBoard(board, id)
         except ValueError as exc:
@@ -221,6 +272,7 @@ def create_board():
             user_info = retrieveUserInfo(claims)
             id = createBoard(claims, request.form['name'])
             addBoardToUser(user_info, id)
+            
         except ValueError as exc:
             error_message = str(exc)
     return redirect('/')
