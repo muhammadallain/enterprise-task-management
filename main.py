@@ -148,11 +148,29 @@ def deleteUser(board_id, user):
     board = getBoardByKey(board_id)
     user_list_keys = board['user_list']
     user_list_keys.remove(user)
-    
     board.update({
         'user_list' : user_list_keys
     })
     datastore_client.put(board)
+    tasks = retrieveTasks(board)
+    for task in tasks:
+        if task['assigned_to'] == user:
+            task.update({
+                'assigned_to': "unassigned"
+            })
+            datastore_client.put(task)
+    entity_key = datastore_client.key('UserInfo', user)
+    entity = datastore_client.get(entity_key)
+    board_keys = entity['board_list']
+    board_keys.remove(board_id)
+    entity.update({
+        'board_list': board_keys
+    })
+    datastore_client.put(entity)
+    
+    
+            
+    
 
 # Update markers
 def update_markers(board):
@@ -161,8 +179,6 @@ def update_markers(board):
     completed_tasks = 0
     total_tasks = 0
     completed_today = 0
-    
-    
     for task in tasks:
         
         if task['status'] == "complete":
