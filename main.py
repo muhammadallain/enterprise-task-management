@@ -38,7 +38,11 @@ def createBoard(claims, name):
         'name': name,
         'task_list': [],
         'user_list': [],
-        'creator': claims['email']
+        'creator': claims['email'],
+        'active_tasks': 0,
+        'completed_tasks': 0,
+        'completed_today': 0,
+        'total_tasks': 0
     })
     datastore_client.put(entity)
     addUserToBoard(entity, claims['email'])
@@ -131,11 +135,48 @@ def deleteTask(board_id, task_id):
     board = getBoardByKey(board_id)
     task_list_keys = board['task_list']
 
-    task_key = datastore_client.key('task', task_id)
+    task_key = datastore_client.key('Task', task_id)
     datastore_client.delete(task_key)
     task_list_keys.remove(task_id)
     board.update({
         'task_list' : task_list_keys
+    })
+    datastore_client.put(board)
+    
+######################### Delete User ########################
+def deleteUser(board_id, user):
+    board = getBoardByKey(board_id)
+    user_list_keys = board['user_list']
+    user_list_keys.remove(user)
+    
+    board.update({
+        'user_list' : user_list_keys
+    })
+    datastore_client.put(board)
+
+# Update markers
+def update_markers(board):
+    tasks = retrieveTasks(board)
+    active_tasks = 0
+    completed_tasks = 0
+    total_tasks = 0
+    completed_today = 0
+    
+    
+    for task in tasks:
+        
+        if task['status'] == "complete":
+            completed_tasks = completed_tasks + 1
+            if task['completed_at'].date() == datetime.datetime.now().date():
+                completed_today = completed_today + 1
+        else:
+            active_tasks = active_tasks + 1
+    total_tasks = active_tasks + completed_tasks
+    board.update({
+        'active_tasks': active_tasks,
+        'completed_tasks': completed_tasks,
+        'completed_today': completed_today,
+        'total_tasks': total_tasks
     })
     datastore_client.put(board)
 
@@ -148,28 +189,6 @@ def deleteTask(board_id, task_id):
 
 
 
-
-
-
-
-
-
-# Calculate average ratings
-def update_average_rating(vehicle_info):
-    reviews = retrieveReviews(vehicle_info)
-    sum = 0
-    for review in reviews:
-        sum += int(review['rating'])
-    if len(reviews)!=0:
-        average = sum/len(reviews)
-        average = round(average, 2)
-    else:
-        average = 0
-    vehicle_info.update({
-        'average_rating': average
-    })
-    datastore_client.put(vehicle_info)
-    return average
 ######################### Bind Reviews to VehicleInfo ############################
 def addReviewToVehicle(vehicle_info, id):
     review_keys = vehicle_info['review_list']
@@ -211,6 +230,21 @@ def addReviewToUser(user_info, id):
 ################################## App Routes ##################################
 ################################################################################
 
+
+@app.route('/delete_user/<email>', methods=['GET', 'POST'])
+def delete_user(email):
+    id_token = request.cookies.get("token")
+    error_message = None
+    current_id = int(request.form['board_id'])
+    if id_token:
+        try:
+            claims = google.oauth2.id_token.verify_firebase_token(
+                    id_token, firebase_request_adapter)
+            deleteUser(current_id, email)
+            
+        except ValueError as exc:
+            error_message = str(exc)
+    return redirect(url_for("open_board", id=current_id))
 
 @app.route('/delete_task/<int:id>', methods=['GET', 'POST'])
 def delete_task(id):
@@ -289,8 +323,10 @@ def open_board(id):
                     id_token, firebase_request_adapter)
                 user_info = retrieveUserInfo(claims)
                 board = getBoardByKey(id)
+                update_markers(board)
                 tasks = retrieveTasks(board)
                 users = retrieveUsers(board)
+                
             except ValueError as exc:
                 error_message = str(exc)
         return render_template('board.html', user_data=claims, error_message=error_message, user_info=user_info, 

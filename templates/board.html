@@ -58,6 +58,7 @@
 
                     <label for="assigned_to">Assign Task</label>
                     <select name="assigned_to" id="assigned_to" style="margin-right: 1em; min-width: 180px;">
+                        <option value="unassigned">Unassigned</option>
                         {% for user in users %}
                         <option value="{{ user.email }}"> {{ user.email }}</option>
                         {% endfor %}
@@ -94,12 +95,10 @@
         </div>
         {% endif %}
     </section>
+    <!--------------------------------------- User Table ----------------------------------------------->
     <section class="task-table">
-        {% if user_data['email'] == board.creator %}
-        <div style="max-height: 530px; overflow-y: scroll;">
-            {% elif user_data['email'] != board.creator %}
-            <div style="max-height: 320px; overflow-y: scroll;">
-                {% endif %}
+        
+            <div style="max-height: 300px; overflow-y: scroll;">
                 <fieldset style="display: inline;">
                     <legend style="padding: 1em; text-transform: uppercase; font-weight: 600;">
                         Current Users in this task board
@@ -109,6 +108,7 @@
                             <th>No.</th>
                             <th>Name</th>
                             <th>Email</th>
+                            
                         </tr>
                         {% for user in users %}
                         <tr>
@@ -119,11 +119,23 @@
                                 <strong>(Creator)</strong>
                                 {% endif %}
                             </td>
+                            {% if user_data['email'] == board.creator and user.email != board.creator %}
+                            <td>
+                                <form action="/delete_user/{{ user.email }}" method="POST">
+                                    <input type="number" name="board_id" value="{{ current_id }}" hidden>
+                                    <input type="submit" name="submit" value="Delete" class="formbutton"
+                                        style="border-color: crimson; border-style: solid;">
+                                </form>
+                            </td>
+                            {% endif %}
                         </tr>
                         {% endfor %}
                     </table>
                 </fieldset>
             </div>
+    </section>
+    <section class="task-table">
+        
     </section>
     <!--------------------------------------- Task Table ----------------------------------------------->
     <section class="task-table">
@@ -133,6 +145,13 @@
                 <legend style="padding: 1em; text-transform: uppercase; font-weight: 600;">
                     Tasks
                 </legend>
+                <dl>
+                    <dt>No. of Active Tasks:</dt><dd>{{ board.active_tasks }}</dd>
+                    <dt>No. of Completed Tasks:</dt><dd>{{ board.completed_tasks}}</dd>
+                    <dt>Total No. of Tasks:</dt><dd>{{ board.total_tasks }}</dd>
+                    <dt>Total Completed Today:</dt><dd>{{ board.completed_today }}</dd> 
+                </dl>
+                <hr>
                 <table style="display: flex; flex-wrap: wrap;">
                     <tr>
                         <th>No.</th>
@@ -145,7 +164,11 @@
                         <th>Controls</th>
                     </tr>
                     {% for task in tasks %}
+                    {% if task.assigned_to != "unassigned" %}
                     <tr>
+                    {% elif task.assigned_to == "unassigned" %}
+                    <tr class="not_assigned">
+                    {% endif %}
                         <td>{{ loop.index }}</td>
                         <td>{{ task.title }}</td>
                         <td>{{ task.due_date }}</td>

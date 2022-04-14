@@ -12,13 +12,15 @@ ul, nav{
 }
 dt{
     display: inline-block;
-    width: 130px;
-    color: #fff;
     text-align: left;
+    margin: 1em 1em;
+    font-weight: bold;
 }
 dd{
     display: inline;
     text-align: left;
+    margin: 1em 1em;
+    font-weight: bold;
 }
 h3{
     text-align: center;
@@ -209,9 +211,11 @@ table{
     text-align: center;
 }
 th, td, tr{
-    margin: 1em;
-    padding-left: 1em;
-    padding-right: 1em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+tr:hover{
+    background-color: aliceblue;
 }
 .table{
     display: flex;
@@ -234,10 +238,11 @@ th, td, tr{
     vertical-align: center;
     color: white;
 }
+.not_assigned{
+    background-color: rgba(220, 20, 60, 0.522);
+}
 .formbutton{
     padding: 0.5em;
-    margin-bottom: 1em;
-    margin-top: 1em;
     border-radius: 0.5em;
     background-color: #fff;
     border-style: none;
