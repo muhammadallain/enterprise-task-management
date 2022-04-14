@@ -54,6 +54,16 @@ def retrieveBoards(user_info):
     board_list = datastore_client.get_multi(board_keys)
     return board_list
 
+#Retrieve User Objects
+def retrieveUsers(board):
+    #make key objects out of all the keys and retrieve them
+    user_id = board['user_list']
+    user_keys = []
+    for i in range(len(user_id)):
+        user_keys.append(datastore_client.key('UserInfo', user_id[i]))
+    user_list = datastore_client.get_multi(user_keys)
+    return user_list
+
 # Get a board by key
 def getBoardByKey(id):
     entity_key = datastore_client.key('Board', id)
@@ -95,6 +105,12 @@ def retrieveTasks(board):
     task_list = datastore_client.get_multi(task_keys)
     return task_list
 
+# Get a board by key
+def getTaskByKey(id):
+    entity_key = datastore_client.key('Task', id)
+    entity = datastore_client.get(entity_key)
+    return entity
+
 def addTaskToBoard(board, id):
     task_keys = board['task_list']
     task_keys.append(id)
@@ -110,6 +126,18 @@ def addUserToBoard(board, email):
     })
     datastore_client.put(board)
 
+######################### Delete Task ########################
+def deleteTask(board_id, task_id):
+    board = getBoardByKey(board_id)
+    task_list_keys = board['task_list']
+
+    task_key = datastore_client.key('task', task_id)
+    datastore_client.delete(task_key)
+    task_list_keys.remove(task_id)
+    board.update({
+        'task_list' : task_list_keys
+    })
+    datastore_client.put(board)
 
 
 
@@ -160,18 +188,6 @@ def addReviewToUser(user_info, id):
     datastore_client.put(user_info)
 
 
-######################### Delete Vehicles via UserInfo ########################
-def deleteVehicle(claims, id):
-    user_info = retrieveUserInfo(claims)
-    vehicle_list_keys = user_info['vehicle_list']
-
-    vehicle_key = datastore_client.key('Vehicle', id)
-    datastore_client.delete(vehicle_key)
-    vehicle_list_keys.remove(id)
-    user_info.update({
-        'vehicle_list' : vehicle_list_keys
-    })
-    datastore_client.put(user_info)
 
 
 
@@ -194,6 +210,68 @@ def deleteVehicle(claims, id):
 ################################################################################
 ################################## App Routes ##################################
 ################################################################################
+
+
+@app.route('/delete_task/<int:id>', methods=['GET', 'POST'])
+def delete_task(id):
+    id_token = request.cookies.get("token")
+    error_message = None
+    current_id = int(request.form['board_id'])
+    if id_token:
+        try:
+            claims = google.oauth2.id_token.verify_firebase_token(
+                    id_token, firebase_request_adapter)
+            deleteTask(current_id, id)
+        except ValueError as exc:
+            error_message = str(exc)
+    return redirect(url_for("open_board", id=current_id))
+
+@app.route('/rename_board', methods=['POST'])
+def rename_board():
+    id_token = request.cookies.get("token")
+    error_message = None
+    current_id = int(request.form['board_id'])
+    if id_token:
+        try:
+            claims = google.oauth2.id_token.verify_firebase_token(
+                    id_token, firebase_request_adapter)
+            board = getBoardByKey(current_id)
+            board.update({
+                'name': request.form['name']
+            })
+            datastore_client.put(board)
+        except ValueError as exc:
+            error_message = str(exc)
+    return redirect(url_for("open_board", id=current_id))
+
+@app.route('/mark_task', methods=['POST'])
+def mark_task():
+    id_token = request.cookies.get("token")
+    error_message = None
+    current_id = int(request.form['board_id'])
+    id = int(request.form['id'])
+    if id_token:
+        try:
+            claims = google.oauth2.id_token.verify_firebase_token(
+                    id_token, firebase_request_adapter)
+            task = getTaskByKey(id)
+            if request.form['status'] == 'complete':
+                task.update({
+                    'status': request.form['status'],
+                    'completed_at': datetime.datetime.now()
+                })
+            else:
+                task.update({
+                    'status': request.form['status'],
+                    'completed_at': None
+                })
+            datastore_client.put(task)
+        except ValueError as exc:
+            error_message = str(exc)
+    return redirect(url_for("open_board", id=current_id))
+            
+            
+
 @app.route('/board/<int:id>', methods=['GET','POST'])
 def open_board(id):
     id_token = request.cookies.get("token")
@@ -202,6 +280,8 @@ def open_board(id):
     user_info = None
     board = None
     current_id = id
+    users = None
+    tasks = None
     if request.method == 'GET':
         if id_token:
             try:
@@ -210,10 +290,11 @@ def open_board(id):
                 user_info = retrieveUserInfo(claims)
                 board = getBoardByKey(id)
                 tasks = retrieveTasks(board)
+                users = retrieveUsers(board)
             except ValueError as exc:
                 error_message = str(exc)
         return render_template('board.html', user_data=claims, error_message=error_message, user_info=user_info, 
-                               board=board, current_id=current_id, tasks=tasks)
+                               board=board, current_id=current_id, tasks=tasks, users=users)
 
 @app.route('/add_user', methods=['POST'])
 def add_user():

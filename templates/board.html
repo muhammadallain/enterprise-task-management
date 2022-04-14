@@ -5,80 +5,127 @@
         <div>
             <!--h2>Login Info</h2-->
             {% if user_data %}
-                <h3>Task Board: {{ board.name }}</h3>
-                <p>Created By: {{ board.creator }}</p>
-                <p>Current User: {{ user_data['name'] }}</p>
+            <h3>Task Board: {{ board.name }}</h3>
+
+            {% if user_data['email'] == board.creator %}
+            <button class="formbutton" onclick="rename()">Rename Board</button>
+            <script>
+                function rename() {
+                    document.getElementById("rename-form").hidden = false;
+                }
+            </script>
+
+            <form action="/rename_board" method="POST" id="rename-form" hidden="true">
+                <input type="number" name="board_id" value="{{ current_id }}" hidden>
+                <input type="text" name="name" placeholder="Enter board name" required>
+                <input type="submit" name="submit" value="Submit" class="formbutton" style="margin-right: 1em;">
+            </form>
+            {% endif %}
+
+
+            <p>Created By: {{ board.creator }}</p>
+            <p>Current User: {{ user_data['name'] }}</p>
             {% elif error_message %}
-                <p>Error Message: {{ error_message }}</p>
+            <p>Error Message: {{ error_message }}</p>
             {% endif %}
         </div>
     </section>
+    <!--------------------------------------- Forms ----------------------------------------------->
     <section class="add-task">
-        <form action="/create_task" method="POST" style="margin-top: 1em;">
-            <fieldset style="display: inline;">
+        <!--------------------------------------- Add Task ----------------------------------------------->
+        <div>
+            <form action="/create_task" method="POST" style="margin-top: 1em;">
+                <fieldset style="display: inline;">
 
-                <legend style="padding: 1em; text-transform: uppercase; font-weight: 600;">
-                    Add a new Task
-                </legend>
+                    <legend style="padding: 1em; text-transform: uppercase; font-weight: 600;">
+                        Add a new Task
+                    </legend>
 
-                <input type="number" name="board_id" value="{{ current_id }}" hidden>
+                    <input type="number" name="board_id" value="{{ current_id }}" hidden>
 
-                <label for="title">Task Title</label>
-                <input type="text" name="title" placeholder="Enter task title" required 
-                style="margin-right: 1em; min-width: 180px;"><br>
+                    <label for="title">Task Title</label>
+                    <input type="text" name="title" placeholder="Enter task title" required
+                        style="margin-right: 1em; min-width: 180px;"><br>
 
-                <label for="due_date">Due Date</label>
-                <input type="date" name="due_date" required style="margin-right: 1em; min-width: 180px;"><br>
+                    <label for="due_date">Due Date</label>
+                    <input type="date" name="due_date" required style="margin-right: 1em; min-width: 180px;"><br>
 
-                <label for="status">Status</label>
-                <select name="status" id="status" style="margin-right: 1em; min-width: 180px;">
-                    <option value="not_complete" selected="selected">Not Complete</option>
-                    <option value="complete">Complete</option>
-                </select><br>
+                    <label for="status">Status</label>
+                    <select name="status" id="status" style="margin-right: 1em; min-width: 180px;">
+                        <option value="not_complete" selected="selected">Not Complete</option>
+                        <option value="complete">Complete</option>
+                    </select><br>
 
-                <label for="assigned_to">Assign Task</label>
-                <select name="assigned_to" id="assigned_to"
-                style="margin-right: 1em; min-width: 180px;">
-                <!---------------------------------------------------------------------------------->    
-                <!---------------------------------------------------------------------------------->    
-                <!---------------------------------------------------------------------------------->
-                {% for user in board['user_list'] %}   
-                    <option value="{{ user }}"> {{ user }}</option>
-                {% endfor %}
-                <!---------------------------------------------------------------------------------->
-                <!---------------------------------------------------------------------------------->
-                <!---------------------------------------------------------------------------------->
-                </select><br>
+                    <label for="assigned_to">Assign Task</label>
+                    <select name="assigned_to" id="assigned_to" style="margin-right: 1em; min-width: 180px;">
+                        {% for user in users %}
+                        <option value="{{ user.email }}"> {{ user.email }}</option>
+                        {% endfor %}
+                    </select><br>
 
-                <div style="display: flex; justify-content: right;">
-                    <input type="submit" name="submit" value="Add Task" class="formbutton"
-                    style="margin-right: 1em;">
-                </div>
-                
-            </fieldset>
-        </form>
+                    <div style="display: flex; justify-content: right;">
+                        <input type="submit" name="submit" value="Add Task" class="formbutton"
+                            style="margin-right: 1em;">
+                    </div>
 
-        {% if user_data['email'] == board.creator %}
-        <form action="/add_user" method="POST" style="margin-top: 1em;">
-            <fieldset style="display: inline;">
-                <legend style="padding: 1em; text-transform: uppercase; font-weight: 600;">
-                    Add users to board
-                </legend>
-                <input type="number" name="board_id" value="{{ current_id }}" hidden>
+                </fieldset>
+            </form>
 
-                <label for="email">User Email</label>
-                <input type="email" name="email" placeholder="Enter email of user" required 
-                style="margin-right: 1em; min-width: 180px;"><br>
+            {% if user_data['email'] == board.creator %}
+            <!--------------------------------------- Add User ----------------------------------------------->
 
-                <div style="display: flex; justify-content: right;">
-                    <input type="submit" name="submit" value="Add User" class="formbutton"
-                    style="margin-right: 1em;">
-                </div>
-            </fieldset>
-        </form>
+            <form action="/add_user" method="POST" style="margin-top: 1em;">
+                <fieldset style="display: inline;">
+                    <legend style="padding: 1em; text-transform: uppercase; font-weight: 600;">
+                        Add users to board
+                    </legend>
+                    <input type="number" name="board_id" value="{{ current_id }}" hidden>
+
+                    <label for="email">User Email</label>
+                    <input type="email" name="email" placeholder="Enter email of user" required
+                        style="margin-right: 1em; min-width: 180px;"><br>
+
+                    <div style="display: flex; justify-content: right;">
+                        <input type="submit" name="submit" value="Add User" class="formbutton"
+                            style="margin-right: 1em;">
+                    </div>
+                </fieldset>
+            </form>
+        </div>
         {% endif %}
     </section>
-
+    <section class="task-table">
+        {% if user_data['email'] == board.creator %}
+        <div style="max-height: 530px; overflow-y: scroll;">
+            {% elif user_data['email'] != board.creator %}
+            <div style="max-height: 320px; overflow-y: scroll;">
+                {% endif %}
+                <fieldset style="display: inline;">
+                    <legend style="padding: 1em; text-transform: uppercase; font-weight: 600;">
+                        Current Users in this task board
+                    </legend>
+                    <table>
+                        <tr>
+                            <th>No.</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                        </tr>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ user.name }}</td>
+                            <td>{{ user.email }}
+                                {% if user.email == board.creator %}
+                                <strong>(Creator)</strong>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </fieldset>
+            </div>
+    </section>
+    <!--------------------------------------- Task Table ----------------------------------------------->
     <section class="task-table">
         <div>
             {% if user_data %}
@@ -86,27 +133,68 @@
                 <legend style="padding: 1em; text-transform: uppercase; font-weight: 600;">
                     Tasks
                 </legend>
-                <table>
+                <table style="display: flex; flex-wrap: wrap;">
                     <tr>
+                        <th>No.</th>
                         <th>Task Title</th>
                         <th>Due Date</th>
                         <th>Assigned To</th>
                         <th>Status</th>
-                        <th>Completion Date/Time</th>
+                        <th>Mark As</th>
+                        <th>Completed At</th>
+                        <th>Controls</th>
                     </tr>
                     {% for task in tasks %}
-                        <tr>
-                            <td>{{ task.title }}</td>
-                            <td>{{ task.due_date }}</td>
-                            <td>{{ task.assigned_to }}</td>
-                            <td>{{ task.status }}</td>
-                            <td>{{ task.completed_at }}</td>
-                        </tr>
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ task.title }}</td>
+                        <td>{{ task.due_date }}</td>
+                        <td>{{ task.assigned_to }}
+                            {% if task.assigned_to == board.creator %}
+                            <strong>(Creator)</strong>
+                            {% endif %}
+                        </td>
+                        <td>{{ task.status }}</td>
+                        <td>
+                            {% if task.status == 'not_complete' %}
+                            <form action="/mark_task" method="POST">
+                                <input type="number" name="board_id" value="{{ current_id }}" hidden>
+                                <input type="number" name="id" value="{{ task.id }}" hidden>
+                                <input type="text" name="status" value="complete" hidden>
+                                <input type="submit" name="submit" value="Complete" class="formbutton" id="formbuttonEdit"
+                                    style="border-color: darkgreen; border-style: solid;">
+                            </form>
+                            {% elif task.status == 'complete' %}
+                            <form action="/mark_task" method="POST">
+                                <input type="number" name="board_id" value="{{ current_id }}" hidden>
+                                <input type="number" name="id" value="{{ task.id }}" hidden>
+                                <input type="text" name="status" value="not_complete" hidden>
+                                <input type="submit" name="submit" value="Not Complete" class="formbutton"
+                                    style="border-color: crimson; border-style: solid;">
+                            </form>
+                            {% endif %}
+                        </td>
+                        <td>{{ task.completed_at }}</td>
+                        <td>
+                            <div style="display: flex;">
+                                <form action="/edit_task/{{ task.id }}" method="POST">
+                                    <input type="number" name="board_id" value="{{ current_id }}" hidden>
+                                    <input type="submit" name="submit" value="Edit" class="formbutton" id="formbuttonEdit"
+                                        style="border-color: darkgreen; border-style: solid;">
+                                </form>
+                                <form action="/delete_task/{{ task.id }}" method="POST">
+                                    <input type="number" name="board_id" value="{{ current_id }}" hidden>
+                                    <input type="submit" name="submit" value="Delete" class="formbutton"
+                                        style="border-color: crimson; border-style: solid;">
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
                     {% endfor %}
                 </table>
             </fieldset>
             {% elif error_message %}
-                <p>Error Message: {{ error_message }}</p>
+            <p>Error Message: {{ error_message }}</p>
             {% endif %}
         </div>
     </section>

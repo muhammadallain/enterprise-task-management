@@ -94,9 +94,6 @@ header nav ul ul{
 
 /* For home page banner */
 .class-area{
-    display: flex;
-    flex-direction: column;
-    position: relative;
     justify-content: center;
     color: white;
     text-align: center;
@@ -143,6 +140,13 @@ a.banner-btn, .about-btn{
 }
 .add-task{
     float: right;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.80);
+    color: white;
+    margin: 0em 3em;
+    padding: 1em;
+}
+.add-user{
     text-align: center;
     background-color: rgba(0, 0, 0, 0.80);
     color: white;
@@ -205,10 +209,9 @@ table{
     text-align: center;
 }
 th, td, tr{
-    margin: 2em;
-    padding: 1em;
-    padding-left: 2em;
-    padding-right: 2em;
+    margin: 1em;
+    padding-left: 1em;
+    padding-right: 1em;
 }
 .table{
     display: flex;
@@ -239,11 +242,17 @@ th, td, tr{
     background-color: #fff;
     border-style: none;
     font-size: 1em;
+    min-width: 80px;
     max-width: max-content;
     align-self: center;
 }
 .formbutton:hover{
     background-color: crimson;
+    color: #fff;
+    transition: 0.2s ease-out;
+}
+#formbuttonEdit:hover{
+    background-color: darkgreen;
     color: #fff;
     transition: 0.2s ease-out;
 }
