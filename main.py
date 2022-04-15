@@ -130,6 +130,18 @@ def addUserToBoard(board, email):
     })
     datastore_client.put(board)
 
+######################### Delete Board ########################
+def deleteBoard(board_id, user_info):
+    board_key = datastore_client.key('Board', board_id)
+    datastore_client.delete(board_key)
+    
+    board_list = user_info['board_list']
+    board_list.remove(board_id)
+    user_info.update({
+        'board_list' : board_list
+    })
+    datastore_client.put(user_info)
+    
 ######################### Delete Task ########################
 def deleteTask(board_id, task_id):
     board = getBoardByKey(board_id)
@@ -196,57 +208,32 @@ def update_markers(board):
     })
     datastore_client.put(board)
 
-
-
-
-
-
-
-
-
-
-######################### Bind Reviews to VehicleInfo ############################
-def addReviewToVehicle(vehicle_info, id):
-    review_keys = vehicle_info['review_list']
-    review_keys.append(id)
-    vehicle_info.update({
-        'review_list': review_keys
-    })
-    datastore_client.put(vehicle_info)
-
-def addReviewToUser(user_info, id):
-    review_keys = user_info['review_list']
-    review_keys.append(id)
-    user_info.update({
-        'review_list': review_keys
-    })
-    datastore_client.put(user_info)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ################################################################################
 ################################## App Routes ##################################
 ################################################################################
 
-
+@app.route('/delete_board', methods=['POST'])
+def delete_board():
+    id_token = request.cookies.get("token")
+    error_message=None
+    claims=None
+    board_id = int(request.form['board_id'])
+    
+    if id_token:
+        try:
+            claims = google.oauth2.id_token.verify_firebase_token(
+                    id_token, firebase_request_adapter)
+            user_info = retrieveUserInfo(claims)
+            board = getBoardByKey(board_id)
+            if not board['task_list']:
+                if len(board['user_list']) == 1:
+                    deleteBoard(board_id, user_info)
+            else:
+                return redirect(url_for('open_board', id=board_id))
+        except ValueError as exc:
+            error_message = str(exc)
+    return redirect('/')
+            
 @app.route('/update_task/<int:id>', methods=['GET', 'POST'])
 def update_task(id):
     id_token = request.cookies.get("token")
@@ -431,8 +418,18 @@ def create_task():
                 id_token, firebase_request_adapter)
             user_info = retrieveUserInfo(claims)
             board = getBoardByKey(current_id)
-            id = createTask(claims, request.form['title'], request.form['due_date'], request.form['status'], request.form['assigned_to'])
-            addTaskToBoard(board, id)
+            tasks = retrieveTasks(board)
+            is_present = None
+            for task in tasks:
+                if request.form['title'].casefold() == task['title'].casefold():
+                    is_present = True
+                    break
+                else:
+                    is_present = False
+            
+            if is_present == False:
+                id = createTask(claims, request.form['title'], request.form['due_date'], request.form['status'], request.form['assigned_to'])
+                addTaskToBoard(board, id)
         except ValueError as exc:
             error_message = str(exc)
     return redirect(url_for("open_board", id=current_id))

@@ -20,6 +20,10 @@
                 <input type="text" name="name" placeholder="Enter board name" required>
                 <input type="submit" name="submit" value="Submit" class="formbutton" style="margin-right: 1em;">
             </form>
+            <form action="/delete_board" method="POST">
+                <input type="number" name="board_id" value="{{ current_id }}" hidden>
+                <input type="submit" name="submit" value="Delete Board" class="formbutton">
+            </form>
             {% endif %}
 
 
@@ -134,9 +138,7 @@
                 </fieldset>
             </div>
     </section>
-    <section class="task-table">
-        
-    </section>
+
     <!--------------------------------------- Task Table ----------------------------------------------->
     <section class="task-table">
         <div>
@@ -149,7 +151,8 @@
                     <dt>No. of Active Tasks:</dt><dd>{{ board.active_tasks }}</dd>
                     <dt>No. of Completed Tasks:</dt><dd>{{ board.completed_tasks}}</dd>
                     <dt>Total No. of Tasks:</dt><dd>{{ board.total_tasks }}</dd>
-                    <dt>Total Completed Today:</dt><dd>{{ board.completed_today }}</dd> 
+                    <dt>Total Completed Today:</dt><dd>{{ board.completed_today }}</dd>
+                    
                 </dl>
                 <hr>
                 <table style="display: flex; flex-wrap: wrap;">
@@ -200,9 +203,9 @@
                         <td>{{ task.completed_at }}</td>
                         <td>
                             <div style="display: flex;">
-                                <form action="/edit_task/{{ task.id }}" method="POST">
+                                <form action="/edit_task/{{ task.id }}/{{ current_id }}" method="POST">
                                     <input type="number" name="board_id" value="{{ current_id }}" hidden>
-                                    <input type="submit" name="submit" value="Edit" class="formbutton" id="formbuttonEdit"
+                                    <input type="submit" name="submit" value="Edit" class="formbutton"
                                         style="border-color: darkgreen; border-style: solid;">
                                 </form>
                                 <form action="/delete_task/{{ task.id }}" method="POST">
