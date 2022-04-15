@@ -247,6 +247,51 @@ def addReviewToUser(user_info, id):
 ################################################################################
 
 
+@app.route('/update_task/<int:id>', methods=['GET', 'POST'])
+def update_task(id):
+    id_token = request.cookies.get("token")
+    error_message = None
+    claims = None
+    current_id = None
+    board_id = request.form['board_id']
+    task = None
+    if id_token:
+        try:
+            claims = google.oauth2.id_token.verify_firebase_token(
+                    id_token, firebase_request_adapter)
+            task = getTaskByKey(id)
+            task.update({
+                'title' : request.form['title'],
+                'due_date' : request.form['due_date'],
+                'assigned_to': request.form['assigned_to'],
+            })
+            datastore_client.put(task)
+        except ValueError as exc:
+            error_message = str(exc)
+    return redirect(url_for('open_board', id=board_id))
+
+@app.route('/edit_task/<int:id>/<int:bo>', methods=['GET', 'POST'])
+def edit_task(id, bo):
+    id_token = request.cookies.get("token")
+    error_message = None
+    claims = None
+    current_id = None
+    board_id = bo
+    board=None
+    users=None
+    task = None
+    if id_token:
+            try:
+                claims = google.oauth2.id_token.verify_firebase_token(
+                        id_token, firebase_request_adapter)
+                board = getBoardByKey(bo)
+                task = getTaskByKey(id)
+                users = retrieveUsers(board)
+            except ValueError as exc:
+                error_message = str(exc)
+    return render_template('popup.html', user_data=claims, error_message=error_message, task=task, current_id=id, 
+                           board_id=board_id, board=board, users=users)
+    
 @app.route('/delete_user/<email>', methods=['GET', 'POST'])
 def delete_user(email):
     id_token = request.cookies.get("token")

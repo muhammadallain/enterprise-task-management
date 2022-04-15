@@ -21,20 +21,15 @@
                         <input type="submit" name="submit" value="Create Board" class="formbutton" style="margin-right: 1em;">
                     </fieldset>
                 </form>
-            {% elif error_message %}
-                <p>Error Message: {{ error_message }}</p>
-            {% endif %}
-        </div>
-        <div>
-            {% if user_data %}
-            <fieldset style="display: inline; min-width: 447px; padding-bottom: 1em;">
-                <legend style="padding: 1em; text-transform: uppercase; font-weight: 600;">
-                    My Boards
-                </legend>
-                {% for board in boards %}
-                <p style="line-height: 30px;"><a href="/board/{{ board.id }}">{{ board.name }}</a></p>
-                {% endfor %}
-            </fieldset>
+
+                <fieldset style="display: inline; min-width: 447px; padding-bottom: 1em;">
+                    <legend style="padding: 1em; text-transform: uppercase; font-weight: 600;">
+                        My Boards
+                    </legend>
+                    {% for board in boards %}
+                    <p style="line-height: 30px;"><a href="/board/{{ board.id }}">{{ board.name }}</a></p>
+                    {% endfor %}
+                </fieldset>
             {% elif error_message %}
                 <p>Error Message: {{ error_message }}</p>
             {% endif %}
