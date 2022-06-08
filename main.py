@@ -179,10 +179,6 @@ def deleteUser(board_id, user):
         'board_list': board_keys
     })
     datastore_client.put(entity)
-    
-    
-            
-    
 
 # Update markers
 def update_markers(board):
@@ -288,8 +284,7 @@ def delete_user(email):
         try:
             claims = google.oauth2.id_token.verify_firebase_token(
                     id_token, firebase_request_adapter)
-            deleteUser(current_id, email)
-            
+            deleteUser(current_id, email)           
         except ValueError as exc:
             error_message = str(exc)
     return redirect(url_for("open_board", id=current_id))
@@ -351,8 +346,57 @@ def mark_task():
         except ValueError as exc:
             error_message = str(exc)
     return redirect(url_for("open_board", id=current_id))
+
+@app.route('/add_user', methods=['POST'])
+def add_user():
+    id_token = request.cookies.get("token")
+    error_message = None
+    claims = None
+    user_info = None
+    current_id = int(request.form['board_id'])
+    if id_token:
+        try:
+            claims = google.oauth2.id_token.verify_firebase_token(
+                id_token, firebase_request_adapter)
+            user_info = retrieveUserInfo(claims)
+            board = getBoardByKey(current_id)
             
-            
+            entity_key = datastore_client.key('UserInfo', request.form['email'])
+            entity = datastore_client.get(entity_key)
+            if entity:
+                addUserToBoard(board, request.form['email'])
+                addBoardToUser(entity, current_id) 
+        except ValueError as exc:
+            error_message = str(exc)
+    return redirect(url_for("open_board", id=current_id))
+
+@app.route('/create_task', methods=['POST'])
+def create_task():
+    id_token = request.cookies.get("token")
+    error_message = None
+    claims = None
+    user_info = None
+    current_id = int(request.form['board_id'])
+    if id_token:
+        try:
+            claims = google.oauth2.id_token.verify_firebase_token(
+                id_token, firebase_request_adapter)
+            user_info = retrieveUserInfo(claims)
+            board = getBoardByKey(current_id)
+            tasks = retrieveTasks(board)
+            is_present = False
+            for task in tasks:
+                if request.form['title'].casefold() == task['title'].casefold():
+                    is_present = True
+                    break
+                else:
+                    is_present = False
+            if is_present == False:
+                id = createTask(claims, request.form['title'], request.form['due_date'], request.form['status'], request.form['assigned_to'])
+                addTaskToBoard(board, id)
+        except ValueError as exc:
+            error_message = str(exc)
+    return redirect(url_for("open_board", id=current_id))
 
 @app.route('/board/<int:id>', methods=['GET','POST'])
 def open_board(id):
@@ -374,65 +418,10 @@ def open_board(id):
                 update_markers(board)
                 tasks = retrieveTasks(board)
                 users = retrieveUsers(board)
-                
             except ValueError as exc:
                 error_message = str(exc)
         return render_template('board.html', user_data=claims, error_message=error_message, user_info=user_info, 
                                board=board, current_id=current_id, tasks=tasks, users=users)
-
-@app.route('/add_user', methods=['POST'])
-def add_user():
-    id_token = request.cookies.get("token")
-    error_message = None
-    claims = None
-    user_info = None
-    current_id = int(request.form['board_id'])
-    if id_token:
-        try:
-            claims = google.oauth2.id_token.verify_firebase_token(
-                id_token, firebase_request_adapter)
-            user_info = retrieveUserInfo(claims)
-            board = getBoardByKey(current_id)
-            
-            entity_key = datastore_client.key('UserInfo', request.form['email'])
-            entity = datastore_client.get(entity_key)
-            if entity:
-                addUserToBoard(board, request.form['email'])
-                addBoardToUser(entity, current_id)
-            
-            
-        except ValueError as exc:
-            error_message = str(exc)
-    return redirect(url_for("open_board", id=current_id))
-
-@app.route('/create_task', methods=['POST'])
-def create_task():
-    id_token = request.cookies.get("token")
-    error_message = None
-    claims = None
-    user_info = None
-    current_id = int(request.form['board_id'])
-    if id_token:
-        try:
-            claims = google.oauth2.id_token.verify_firebase_token(
-                id_token, firebase_request_adapter)
-            user_info = retrieveUserInfo(claims)
-            board = getBoardByKey(current_id)
-            tasks = retrieveTasks(board)
-            is_present = None
-            for task in tasks:
-                if request.form['title'].casefold() == task['title'].casefold():
-                    is_present = True
-                    break
-                else:
-                    is_present = False
-            
-            if is_present == False:
-                id = createTask(claims, request.form['title'], request.form['due_date'], request.form['status'], request.form['assigned_to'])
-                addTaskToBoard(board, id)
-        except ValueError as exc:
-            error_message = str(exc)
-    return redirect(url_for("open_board", id=current_id))
 
 @app.route('/create_board', methods=['POST'])
 def create_board():
@@ -447,7 +436,6 @@ def create_board():
             user_info = retrieveUserInfo(claims)
             id = createBoard(claims, request.form['name'])
             addBoardToUser(user_info, id)
-            
         except ValueError as exc:
             error_message = str(exc)
     return redirect('/')

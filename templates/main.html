@@ -1,35 +1,64 @@
 {% extends "base.html" %}
 {% block main %}
 <main>
+    <section>
+        
+    </section>
     <section class="banner-area">
-        <h3>Welcome to Task Manager v1.0</h3>
-        <div id="firebase-auth-container"></div>
-        <button id="sign-out" hidden="true">Sign out</button>
-        <div id="login-info" hidden="true">
+        
+        <div>
+            {% if not user_data %}
+            <h3>Enterprise Task Management</h3>
+            <p style="text-align: center; margin: 2% 25%;">
+                ETM helps you make taskboards for projects so your team can create, share and manage tasks easily.
+            </p>
+            {% endif %}
+            <div id="firebase-auth-container"></div>
+            <button id="sign-out" hidden="true">Sign out</button>
+            
+        </div>
+        
+        <div id="login-info" hidden="true" style="display: flex; flex-direction: row; align-items: flex-start; justify-content: flex-start;">
             <!--h2>Login Info</h2-->
             {% if user_data %}
-                <p>Name: {{ user_data['name'] }}</p>
-                <p>Email: {{ user_data['email'] }}</p>
                 
-                <form action="/create_board" method="POST" style="margin-top: 1em;">
-                    <fieldset style="display: inline;">
-                        <legend style="padding: 1em; text-transform: uppercase; font-weight: 600;">
-                            Create a New Board
-                        </legend>
-                        <label for="name" style="margin-left: 1em;">Board Name</label>
-                        <input type="text" name="name" placeholder="Enter board name" required>
-                        <input type="submit" name="submit" value="Create Board" class="formbutton" style="margin-right: 1em;">
-                    </fieldset>
-                </form>
-
-                <fieldset style="display: inline; min-width: 447px; padding-bottom: 1em;">
-                    <legend style="padding: 1em; text-transform: uppercase; font-weight: 600;">
-                        My Boards
-                    </legend>
-                    {% for board in boards %}
-                    <p style="line-height: 30px;"><a href="/board/{{ board.id }}">{{ board.name }}</a></p>
-                    {% endfor %}
-                </fieldset>
+                <div style="border-right: solid; padding: 4em;">
+                    <div style="text-align: left; max-width: 500px;">
+                        <h3 style="text-align: left; padding-left: 0px;">Enterprise Task Manager v1.0</h3>
+                        <p>Name: {{ user_data['name'] }}</p>
+                        <p>Email: {{ user_data['email'] }}</p>
+                    </div>
+                    
+                    <form action="/create_board" method="POST" style="margin-top: 1em;">
+                        <fieldset style="display: inline;">
+                            <legend style="padding: 1em; text-transform: uppercase; font-weight: 600;">
+                                Create a New Board
+                            </legend>
+                            <label for="name" style="margin-left: 1em;">Board Name</label>
+                            <input type="text" name="name" placeholder="Enter board name" required>
+                            <input type="submit" name="submit" value="Create Board" class="formbutton" style="margin-right: 1em;">
+                        </fieldset>
+                    </form>
+                    
+                </div>
+                <div style="padding: 4em;">
+                    <div style="max-width: 499px;">
+                        <fieldset style="display: inline; min-width: 447px; padding-bottom: 1em;">
+                            <legend style="padding: 1em; text-transform: uppercase; font-weight: 600;">
+                                My Boards
+                            </legend>`
+                            {% if not boards %}
+                            <p>You have not created any boards yet. Create a board to distribute tasks among people.</p>
+                            {% elif boards %}
+                                <ul>
+                                    {% for board in boards %}
+                                    <li style="line-height: 30px; text-align: left; margin-left: 1em; text-transform: uppercase;">{{loop.index}}. <a href="/board/{{ board.id }}">{{ board.name }}</a></li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </fieldset>
+                    </div>
+                </div>
             {% elif error_message %}
                 <p>Error Message: {{ error_message }}</p>
             {% endif %}

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Manager v1.0</title>
+    <title>Enterprise Task Management</title>
     <!--TItle of the page-->
     <link type="text/css" rel="stylesheet" href="/static/style.css">
     <script src="{{ url_for('static', filename='script.js') }}"></script>
@@ -25,7 +25,7 @@
 
     <!---------------------------------- HEADER STARTS HERE ------------------------------------------>
     <header class='header'>
-        <h1><a href="/">Task Manager</a></h1>
+        <h1><a href="/">Enterprise Task Management</a></h1>
         <section class='navsection' id="user-info" hidden="true">
             <nav>
                 <ul class='login_nav'>
@@ -44,16 +44,12 @@
     <!---------------------------------- HEADER ENDS HERE ------------------------------------------>
     {% block main %}{% endblock %}
     <!---------------------------------- FOOTER STARTS HERE ------------------------------------------>
-    <footer>
-        <section>
-            <!--CREATE A SECTION FOR OPENING HOURS AND ADDRESS-->
-            <h1>Task Manager</h1>
-        </section>
+    <footer >
+        <section></section>
         <section>
             <!-- CREATE A SECTION FOR STUDENT INFORMATION-->
             <ul>
-                <li>Muhammad Ali - 3059828</li>
-                <li>&copy All Rights Reserved</li>
+                <li>Muhammad Ali &copy All Rights Reserved</li>
             </ul>
         </section>
     </footer>
