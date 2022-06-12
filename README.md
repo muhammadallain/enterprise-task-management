@@ -1,9 +1,16 @@
 # Enterprise Task Management System
 Helps you make task-boards for projects so your team can create, share and manage tasks easily.
 
+**Note: This is a cloud application based on Google App Engine. A working Google cloud account is required to run this application. Also, This app doesnot require you to pay for cloud services. Follow the steps below to setup a free Google App Engine project to run this app.**
+
+Leave a message if you are having problems and need any help at muhammadallain@gmail.com
+
 ## Requirements
 * Python 3.8
 * Google-App-Engine SDK
+* Google Cloud Project
+* Cloud Datastore
+* Firebase Authentication
 
 ## Installing Google App Engine SDK
 Go to following link:
@@ -82,6 +89,7 @@ tag” and take a copy of the template code provided there and fill in the detai
 In application folder, open the file following the path ../static/app-setup.js
 
 This file includes a code like this
+```javascript
   var firebaseConfig = {
   apiKey: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
   authDomain: "xxxxxxxxxxxxxx.firebaseapp.com",
@@ -90,8 +98,7 @@ This file includes a code like this
   messagingSenderId: "xxxxxxxxxxxxxxxxx",
   appId: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 };
-
+```
 Just copy paste your firebase details you got in the code and your are good to go. Datastore is attached to your Application.
 
-This is a cloud application based on Google App Engine. A working Google cloud account is required to run this application. Follow the steps below to setup a free Google App Engine project to run this app.
-
+**Leave a message if you are having problems and need any help at muhammadallain@gmail.com**
